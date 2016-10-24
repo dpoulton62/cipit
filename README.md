@@ -4,6 +4,7 @@ Version 0.09
 Author:  Vince Loschiavo
 
 This product is made available subject to the terms of GNU Lesser General Public License Version 2.1.
+
 Last updated: 2013-04-15
 Moved from sourceforge, original project here: https://sourceforge.net/projects/cipinventory/
 
