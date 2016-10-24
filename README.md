@@ -1,21 +1,44 @@
 CIPIT - Cisco IP Phone Inventory Tool
 --------------------------------------------
-Version 0.09
+Version 0.11
 Author:  Vince Loschiavo
 
 This product is made available subject to the terms of GNU Lesser General Public License Version 2.1.
 
-Last updated: 2013-04-15
-
-Moved from sourceforge, original project here: https://sourceforge.net/projects/cipinventory/
-
 --------------------------------------------
 MD5SUM:
-fb69d7808b87db719706373ffeee7ed0  cipit.pl
+  9f780c06c7cbec1745b01413506ab56a  cipit-v0.11.pl
 
 --------------------------------------------
 REQUIREMENTS:
 
+Linux: 
+	-Perl (comes standard with most distributions)
+	-Additional Perl Modules required - Use CPAN (CPANPLUS) to install non-standard packages:
+		Sort::Key::IPv4
+		NetAddr::IP
+		IO::Socket::INET
+		Time::HiRes
+		XML::Simple
+		
+		usage "cpanplus -i PACKAGE::Name"
+		
+Windows:
+	-Perl 
+		-Tested with: Activestate Perl: http://www.activestate.com/activeperl/ 
+		-Additional Perl Modules are required
+			-Activestate Perl comes with CPAN, use this to install the additional modules
+				At a command prompt:  "cpan"  (this will auto install any necessary components (compiler, etc).
+				from the "cpan>" prompt install the additional modules like so:
+				"cpan> install Sort::Key::IPv4"
+				"cpan> install NetAddr::IP"
+				"cpan> install IO::Socket::INET"
+				"cpan> install Time::HiRes"
+				"cpan> install XML::Simple"
+				
+				This will install any necessary prerequisites.
+
+Other requirements:				
 -At least one Cisco IP Phone with the web page enabled
 -A *nix or Windows machine with a Perl interpreter installed.  http://www.activestate.com/Products/activeperl/ is one such example.
 -A list of IP addresses of your phones.  
@@ -27,49 +50,17 @@ REQUIREMENTS:
 --------------------------------------------
 USAGE:
 
-CIPIT requires two command line arguments.
+CIPIT now has built in help.
+	
+	cipit.pl -h 
+	cipit.pl --help
 	
 	
-	cipit.pl <input file> <output.cvs file>
-	
-	
-The input file should be a text file with one IP per line.
-One way to create this input file is to cut and paste the Device Page
-of your Cisco CCM into a spreadsheet and remove the CCM server IPs.
-
-
-CIPIT will only grab one IP per line and ignore the rest.
-
-
-Alternatively if you are using CCME the following command works well:
-show ephone | redirect tftp://<yourTftpServerIP>/inputfilename.txt
-
-
-Thank you for using CIPIT.  Version Number: $versionnumber
+Thank you for using CIPIT.  Version Number: 0.10
 
 Feel free to examine the code and offer suggestions to the author.
 <first initial> + <last name> @ gmail d0t com
 Vince Loschiavo
-
----------------------------------------------
-Planned Features for future release v0.10:
-
-	Plans to support CIDR IP notation from the commandline
-
----------------------------------------------
-Current Features:
-v0.09
-	Added Support for 7906.  Thank you to the anonymous poster on sourceforge.
-
-v0.08
-This script was tested with Cisco SCCP images:
-7905, 7910, 7911, 7912, 7920, 7940, 7941, 7960, 7961, 7970.
-
-It doesn't work for Cisco 7935 or 7936 phones 
-as you have to log into the phones web page....
-
-	-Includes Duplicate IP checking
-	-Limited reporting on Phones that do not respond
-	-Overwrite file check
-	-progress indicator
+https://sourceforge.net/projects/cipinventory/
+http://www.linkedin.com/in/vloschiavo
 
