@@ -56,7 +56,7 @@ CIPIT now has built in help.
 	cipit.pl --help
 	
 	
-Thank you for using CIPIT.  Version Number: 0.10
+Thank you for using CIPIT.
 
 Feel free to examine the code and offer suggestions to the author.
 <first initial> + <last name> @ gmail d0t com
