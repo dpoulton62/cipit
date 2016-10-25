@@ -4,6 +4,7 @@
 # (CIPIT)
 # This Script was written by Vince Loschiavo
 # 2012-JAN-03
+# Modified: 2016-OCT-24 - added VLANId, AltTFTP, and DHCPEnabled fields to output for XML enabled phones.
 #
 # if you enjoy it or have comments/suggestions
 #        please drop me an email:
@@ -70,11 +71,11 @@
 ####################################################################################################################################
 
 
-#####################################
-#									#
+#########################################
+#					#
 #  Define Variables & Includes		#
-#									#
-#####################################
+#					#
+#########################################
 
 use LWP::Simple;
 use Net::Ping;
@@ -187,7 +188,7 @@ if ($opt_inputfile) {
 open (CSVOUTPUT, "> $opt_outputfile") or die "Couldn't open $opt_outputfile for writing: $!\n";
 
 # Write CSV File Header
-print CSVOUTPUT ("Phone Record Number,IP Address,Model Number,MAC Address,Host Name,Phone DN,Phone Load Version,Phone Serial Number,XML Capable,CDP Switch Host Name,CDP Switch IPv4 Address,CDP Switch IPv6 Address,CDP Switch Port,LLDP Switch Hostname,LLDP Switch IPv4 Address,LLDP Switch IPv6 Address,LLDP Switch Port,Port Speed,Port Duplex,Port Information\n");
+print CSVOUTPUT ("Phone Record Number,IP Address,Model Number,MAC Address,Host Name,Phone DN,Phone Load Version,Phone Serial Number,XML Capable,CDP Switch Host Name,CDP Switch IPv4 Address,CDP Switch IPv6 Address,CDP Switch Port,LLDP Switch Hostname,LLDP Switch IPv4 Address,LLDP Switch IPv6 Address,LLDP Switch Port,Port Speed,Port Duplex,Port Information,VLAN ID,Alt TFTP,DHCP Enabled\n");
 print("Parsing Web Pages: ");
 print(' ');
 # get the xml or html for each IP
@@ -707,8 +708,8 @@ sub parse_xml {
 	if (exists $data->{HostName})		{ print CSVOUTPUT ("$data->{HostName},")	} else { print CSVOUTPUT ","};	# Host Name
 	if (exists $data->{phoneDN})		{ print CSVOUTPUT ("$data->{phoneDN},")		} else { print CSVOUTPUT ","};	# Find the Phone's DN
 	if (exists $data->{appLoadID})		{ print CSVOUTPUT ("$data->{appLoadID},")	} else { print CSVOUTPUT ","};	# Find the Phone Load Version number
-	if (exists $data->{serialNumber})	{ print CSVOUTPUT ("$data->{serialNumber},")} else { print CSVOUTPUT ","};	# Find the Phone Serial Number
-	print CSVOUTPUT ("true");								# XML Capable
+	if (exists $data->{serialNumber})	{ print CSVOUTPUT ("$data->{serialNumber},")	} else { print CSVOUTPUT ","};	# Find the Phone Serial Number
+	print CSVOUTPUT ("true");					# XML Capable
 	if ($data->{modelNumber} =~ /CP-7921G|CP-7925G/) {		# CP-7921G and CP-7925G - Wireless phones
 		print CSVOUTPUT ("\n");
 	} elsif ($data->{modelNumber} =~ /CP-7940|CP-7960/) {		# CP-7960G and CP-7940G has a different XML format for the port information page
@@ -716,30 +717,36 @@ sub parse_xml {
 		if (exists $PortData->{deviceId})	{ print CSVOUTPUT (",$PortData->{deviceId},")	} else { print CSVOUTPUT ","};		# Switch Hostname
 		if (exists $PortData->{ipAddress}) 	{ print CSVOUTPUT ("$PortData->{ipAddress},")	} else { print CSVOUTPUT ","};		# Switch IP Address
 		print CSVOUTPUT (",");					# IPv6 is not a valid field for this phone type
-		if (exists $PortData->{port})		{ print CSVOUTPUT ("$PortData->{port},")		} else { print CSVOUTPUT ","};		# Switch Switch Port
+		if (exists $PortData->{port})		{ print CSVOUTPUT ("$PortData->{port},")	} else { print CSVOUTPUT ","};		# Switch Switch Port
 		print CSVOUTPUT ("LLDP Not Supported,");		# CP7960/7940's do not support LLDP
 		print CSVOUTPUT ("LLDP Not Supported,");		# CP7960/7940's do not support LLDP
 		print CSVOUTPUT ("LLDP Not Supported,");		# CP7960/7940's do not support LLDP
 		print CSVOUTPUT ("LLDP Not Supported,");		# CP7960/7940's do not support LLDP
 		if (exists $PortData->{PortSpeed}) {
-			$PortData->{PortSpeed} =~ s/,\s+/,/;                    # Remove the Whitespace - Match the comma and one or more whitespace characters and replace with a comma
-			print CSVOUTPUT ("$PortData->{PortSpeed},")										} else { print CSVOUTPUT ","};		# Switch Port Speed and Duplex
-		if (exists $PortData->{PortInformation})	{ print CSVOUTPUT ("$PortData->{PortInformation}") } else { print CSVOUTPUT ","};	# Switch Port Information (Switch port Description? - needs testing)
+			$PortData->{PortSpeed} =~ s/,\s+/,/;		# Remove the Whitespace - Match the comma and one or more whitespace characters and replace with a comma
+			print CSVOUTPUT ("$PortData->{PortSpeed},")	} else { print CSVOUTPUT ","};		# Switch Port Speed and Duplex
+
+		if (exists $PortData->{PortInformation})	{ print CSVOUTPUT ("$PortData->{PortInformation}") } else { print CSVOUTPUT ","};	# Switch Port Information
 		print CSVOUTPUT ("\n");					# Print a newline to start a new record
+
 	} else {
+
 		my $PortData = $xml->XMLin($content_net);		# Parse the XML data from the Servicibility Web page on the phone (Works for most phones)
 		if (exists $PortData->{CDPNeighborDeviceId}) 		{ print CSVOUTPUT (",$PortData->{CDPNeighborDeviceId},")	} else { print CSVOUTPUT ","};	# Switch Hostname
-		if (exists $PortData->{CDPNeighborIP})				{ print CSVOUTPUT ("$PortData->{CDPNeighborIP},") 			} else { print CSVOUTPUT ","};	# Switch IPv4 Address
-		if (exists $PortData->{CDPNeighborIPv6})			{ print CSVOUTPUT ("$PortData->{CDPNeighborIPv6},")			} else { print CSVOUTPUT ","};	# Switch IPv6 Address
-		if (exists $PortData->{CDPNeighborPort})			{ print CSVOUTPUT ("$PortData->{CDPNeighborPort},")			} else { print CSVOUTPUT ","};	# Switch Switch Port
+		if (exists $PortData->{CDPNeighborIP})			{ print CSVOUTPUT ("$PortData->{CDPNeighborIP},") 		} else { print CSVOUTPUT ","};	# Switch IPv4 Address
+		if (exists $PortData->{CDPNeighborIPv6})		{ print CSVOUTPUT ("$PortData->{CDPNeighborIPv6},")		} else { print CSVOUTPUT ","};	# Switch IPv6 Address
+		if (exists $PortData->{CDPNeighborPort})		{ print CSVOUTPUT ("$PortData->{CDPNeighborPort},")		} else { print CSVOUTPUT ","};	# Switch Switch Port
 		if (exists $PortData->{LLDPNeighborDeviceId})		{ print CSVOUTPUT ("$PortData->{LLDPNeighborDeviceId},")	} else { print CSVOUTPUT ","};	# LLDP Neighbor Switch Hostname
-		if (exists $PortData->{LLDPNeighborIP})				{ print CSVOUTPUT ("$PortData->{LLDPNeighborIP},")			} else { print CSVOUTPUT ","};	# LLDP Neighbor Switch IP Address
-		if (exists $PortData->{LLDPNeighborIPv6})			{ print CSVOUTPUT ("$PortData->{LLDPNeighborIPv6},")		} else { print CSVOUTPUT ","};	# LLDP Neighbor Switch IPv6 Address
-		if (exists $PortData->{LLDPNeighborPort})			{ print CSVOUTPUT ("$PortData->{LLDPNeighborPort},")		} else { print CSVOUTPUT ","};	# LLDP Neighbor Switch Port
-		if (exists $PortData->{PortSpeed}) {
+		if (exists $PortData->{LLDPNeighborIP})			{ print CSVOUTPUT ("$PortData->{LLDPNeighborIP},")		} else { print CSVOUTPUT ","};	# LLDP Neighbor Switch IP Address
+		if (exists $PortData->{LLDPNeighborIPv6})		{ print CSVOUTPUT ("$PortData->{LLDPNeighborIPv6},")		} else { print CSVOUTPUT ","};	# LLDP Neighbor Switch IPv6 Address
+		if (exists $PortData->{LLDPNeighborPort})		{ print CSVOUTPUT ("$PortData->{LLDPNeighborPort},")		} else { print CSVOUTPUT ","};	# LLDP Neighbor Switch Port
+		if (exists $PortData->{PortSpeed}) 			{ 
 			$PortData->{PortSpeed} =~ s/,\s+/,/;			# Remove the Whitespace - Match the comma and one or more whitespace characters and replace with a comma
-			print CSVOUTPUT ("$PortData->{PortSpeed},")																	} else { print CSVOUTPUT ","};		# Switch Port Speed and Duplex cells
-		if (exists $PortData->{PortInformation})			{ print CSVOUTPUT ("$PortData->{PortInformation}")			} else { print CSVOUTPUT ","};	# Switch Port Information (Switch port Description? - needs testing)
+			print CSVOUTPUT ("$PortData->{PortSpeed},")	} else { print CSVOUTPUT ","};		# Switch Port Speed and Duplex cells
+		if (exists $PortData->{PortInformation})		{ print CSVOUTPUT ("$PortData->{PortInformation}")		} else { print CSVOUTPUT ","};	# Switch Port Information
+		if (exists $PortData->{VLANId})				{ print CSVOUTPUT ("$PortData->{VLANId}")			} else { print CSVOUTPUT ","};  # Phone VLAN ID
+		if (exists $PortData->{AltTFTP})			{ print CSVOUTPUT ("$PortData->{AltTFTP}")			} else { print CSVOUTPUT ","};  # Alternative TFTP Server
+		if (exists $PortData->{DHCPEnabled})			{ print CSVOUTPUT ("$PortData->{DHCPEnabled}")			} else { print CSVOUTPUT ","};  # DHCP Client Enabled
 		print CSVOUTPUT ("\n");					# Print a newline to start a new record
 	}
 }
