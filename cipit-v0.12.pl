@@ -124,6 +124,8 @@ my $opt_timeout = 8;	# Ping and IO::Socket timeout - Default set at 8 seconds as
 my $opt_repeat = 2;		# Number of times through the SYN/ACK/Socket loop (Default = 2);
 my $xml_switchinfo_url;	# URL for switch port info
 my $content_net;		# Switch port XML data
+my $xml_NetworkConfiguration_url;	# Phone Network Configuration URL
+my $content_netconfig;			# Network Configuration XML data
 
 Getopt::Long::Configure("no_ignore_case");
 GetOptions(
@@ -200,6 +202,8 @@ BIG:	foreach (@PhoneIPs) {
 		$content = get $xml_url;
 		$xml_switchinfo_url = "http://$_" . '/CGI/Java/Serviceability?adapterX=device.statistics.port.network';	# XML page for Network Port information
 		$content_net = get $xml_switchinfo_url;
+		$xml_NetworkConfiguration_url = "http://$_" . '/NetworkConfigurationX'; # XML page for the phone's network configuration
+		$content_netconfig = get $xml_NetworkConfiguration_url;
 		# Sanity check for grabbed phone-web page content
 		if (not defined($content)) {										# Phone doesn't support XML - handle the phone web page as best as possible
 			$url = "http://$_";  											# Phone Does not support XML.  Let's grab the default page.
@@ -744,9 +748,11 @@ sub parse_xml {
 			$PortData->{PortSpeed} =~ s/,\s+/,/;			# Remove the Whitespace - Match the comma and one or more whitespace characters and replace with a comma
 			print CSVOUTPUT ("$PortData->{PortSpeed},")	} else { print CSVOUTPUT ","};		# Switch Port Speed and Duplex cells
 		if (exists $PortData->{PortInformation})		{ print CSVOUTPUT ("$PortData->{PortInformation}")		} else { print CSVOUTPUT ","};	# Switch Port Information
-		if (exists $PortData->{VLANId})				{ print CSVOUTPUT ("$PortData->{VLANId}")			} else { print CSVOUTPUT ","};  # Phone VLAN ID
-		if (exists $PortData->{AltTFTP})			{ print CSVOUTPUT ("$PortData->{AltTFTP}")			} else { print CSVOUTPUT ","};  # Alternative TFTP Server
-		if (exists $PortData->{DHCPEnabled})			{ print CSVOUTPUT ("$PortData->{DHCPEnabled}")			} else { print CSVOUTPUT ","};  # DHCP Client Enabled
+
+		my $NetData = $xml->XMLin($content_netconfig);		# Parse the XML from Network Configuration XML page
+		if (exists $NetData->{VLANId})				{ print CSVOUTPUT ("$NetData->{VLANId}")			} else { print CSVOUTPUT ","};  # Phone VLAN ID
+		if (exists $NetData->{AltTFTP})				{ print CSVOUTPUT ("$NetData->{AltTFTP}")			} else { print CSVOUTPUT ","};  # Alternative TFTP Server
+		if (exists $NetData->{DHCPEnabled})			{ print CSVOUTPUT ("$NetData->{DHCPEnabled}")			} else { print CSVOUTPUT ","};  # DHCP Client Enabled
 		print CSVOUTPUT ("\n");					# Print a newline to start a new record
 	}
 }
