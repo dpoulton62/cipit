@@ -716,27 +716,31 @@ sub parse_xml {
 	print CSVOUTPUT ("true");					# XML Capable
 	if ($data->{modelNumber} =~ /CP-7921G|CP-7925G/) {		# CP-7921G and CP-7925G - Wireless phones
 		print CSVOUTPUT ("\n");
-	} elsif ($data->{modelNumber} =~ /CP-7940|CP-7960/) {		# CP-7960G and CP-7940G has a different XML format for the port information page
+	} elsif ($data->{modelNumber} =~ /CP-7940|CP-7960/) 	{	# CP-7960G and CP-7940G has a different XML format for the port information page
 		my $PortData = $xml->XMLin($content_net);		# Parse the XML data from the Servicibility Web page on the phone (Works for most phones)
-		if (exists $PortData->{deviceId})	{ print CSVOUTPUT (",$PortData->{deviceId},")	} else { print CSVOUTPUT ","};		# Switch Hostname
-		if (exists $PortData->{ipAddress}) 	{ print CSVOUTPUT ("$PortData->{ipAddress},")	} else { print CSVOUTPUT ","};		# Switch IP Address
+		if (exists $PortData->{deviceId})		{ print CSVOUTPUT (",$PortData->{deviceId},")	} else { print CSVOUTPUT ",,"};		# Switch Hostname
+		if (exists $PortData->{ipAddress}) 		{ print CSVOUTPUT ("$PortData->{ipAddress},")	} else { print CSVOUTPUT ","};		# Switch IP Address
 		print CSVOUTPUT (",");					# IPv6 is not a valid field for this phone type
-		if (exists $PortData->{port})		{ print CSVOUTPUT ("$PortData->{port},")	} else { print CSVOUTPUT ","};		# Switch Switch Port
+		if (exists $PortData->{port})			{ print CSVOUTPUT ("$PortData->{port},")	} else { print CSVOUTPUT ","};		# Switch Switch Port
 		print CSVOUTPUT ("LLDP Not Supported,");		# CP7960/7940's do not support LLDP
 		print CSVOUTPUT ("LLDP Not Supported,");		# CP7960/7940's do not support LLDP
 		print CSVOUTPUT ("LLDP Not Supported,");		# CP7960/7940's do not support LLDP
 		print CSVOUTPUT ("LLDP Not Supported,");		# CP7960/7940's do not support LLDP
 		if (exists $PortData->{PortSpeed}) {
 			$PortData->{PortSpeed} =~ s/,\s+/,/;		# Remove the Whitespace - Match the comma and one or more whitespace characters and replace with a comma
-			print CSVOUTPUT ("$PortData->{PortSpeed},")	} else { print CSVOUTPUT ","};		# Switch Port Speed and Duplex
+			print CSVOUTPUT ("$PortData->{PortSpeed},")	} else { print CSVOUTPUT ",,"};		# Switch Port Speed and Duplex
 
-		if (exists $PortData->{PortInformation})	{ print CSVOUTPUT ("$PortData->{PortInformation}") } else { print CSVOUTPUT ","};	# Switch Port Information
+		if (exists $PortData->{PortInformation})		{ print CSVOUTPUT ("$PortData->{PortInformation}") } else { print CSVOUTPUT ","};	# Switch Port Information
+		my $NetData = $xml->XMLin($content_netconfig);		# Parse the XML from Network Configuration XML page
+		if (exists $NetData->{VLANId})				{ print CSVOUTPUT ("$NetData->{VLANId}")			} else { print CSVOUTPUT ","};  # Phone VLAN ID
+		if (exists $NetData->{AltTFTP})				{ print CSVOUTPUT ("$NetData->{AltTFTP}")			} else { print CSVOUTPUT ","};  # Alternative TFTP Server
+		if (exists $NetData->{DHCPEnabled})			{ print CSVOUTPUT ("$NetData->{DHCPEnabled}")			} else { print CSVOUTPUT ","};  # DHCP Client Enabled
 		print CSVOUTPUT ("\n");					# Print a newline to start a new record
 
 	} else {
 
 		my $PortData = $xml->XMLin($content_net);		# Parse the XML data from the Servicibility Web page on the phone (Works for most phones)
-		if (exists $PortData->{CDPNeighborDeviceId}) 		{ print CSVOUTPUT (",$PortData->{CDPNeighborDeviceId},")	} else { print CSVOUTPUT ","};	# Switch Hostname
+		if (exists $PortData->{CDPNeighborDeviceId}) 		{ print CSVOUTPUT (",$PortData->{CDPNeighborDeviceId},")	} else { print CSVOUTPUT ",,"};	# Switch Hostname
 		if (exists $PortData->{CDPNeighborIP})			{ print CSVOUTPUT ("$PortData->{CDPNeighborIP},") 		} else { print CSVOUTPUT ","};	# Switch IPv4 Address
 		if (exists $PortData->{CDPNeighborIPv6})		{ print CSVOUTPUT ("$PortData->{CDPNeighborIPv6},")		} else { print CSVOUTPUT ","};	# Switch IPv6 Address
 		if (exists $PortData->{CDPNeighborPort})		{ print CSVOUTPUT ("$PortData->{CDPNeighborPort},")		} else { print CSVOUTPUT ","};	# Switch Switch Port
@@ -746,7 +750,7 @@ sub parse_xml {
 		if (exists $PortData->{LLDPNeighborPort})		{ print CSVOUTPUT ("$PortData->{LLDPNeighborPort},")		} else { print CSVOUTPUT ","};	# LLDP Neighbor Switch Port
 		if (exists $PortData->{PortSpeed}) 			{ 
 			$PortData->{PortSpeed} =~ s/,\s+/,/;			# Remove the Whitespace - Match the comma and one or more whitespace characters and replace with a comma
-			print CSVOUTPUT ("$PortData->{PortSpeed},")	} else { print CSVOUTPUT ","};		# Switch Port Speed and Duplex cells
+			print CSVOUTPUT ("$PortData->{PortSpeed},")	} else { print CSVOUTPUT ",,"};		# Switch Port Speed and Duplex cells
 		if (exists $PortData->{PortInformation})		{ print CSVOUTPUT ("$PortData->{PortInformation}")		} else { print CSVOUTPUT ","};	# Switch Port Information
 
 		my $NetData = $xml->XMLin($content_netconfig);		# Parse the XML from Network Configuration XML page
